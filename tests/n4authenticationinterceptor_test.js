@@ -9,35 +9,51 @@ describe('n4AuthenticationInterceptor', function() {
         }));
 
         describe('provider', function () {
+            it('should have redirectURL undefined', inject(function () {
+                expect(provider.redirectURL).toBeUndefined();
+            }));
+
             it('should have HTTP status 401 by default', inject(function () {
                 expect(provider.statusHttp).toEqual(401);
             }));
 
-            it('should have not authentication message as "Usuário não autenticado." by default', inject(function () {
+            it('should have authentication message as "Usuário não autenticado." by default', inject(function () {
                 expect(provider.notAuthenticatedMessage).toEqual('Usuário não autenticado.');
+            }));
+
+            it('should have cb as an empty function', inject(function () {
+                expect(provider.cb).toEqual(angular.noop);
             }));
         });
     });
 
     describe('responseError', function () {
         var _http, _httpBackend, _windowMock;
-        var n4AuthenticationInterceptor;
+        var provider;
 
-        beforeEach(module('n4AuthenticationInterceptor', function ($provide) {
+        beforeEach(module('n4AuthenticationInterceptor', function ($provide, n4AuthenticationInterceptorProvider) {
             $provide.constant('$window', {
                 location: {
                     replace: angular.noop
                 }
             });
+
+            provider = n4AuthenticationInterceptorProvider;
+
+            provider.called = false;
+
+            provider.cb = function() {
+              this.called = true;
+            };
         }));
 
         beforeEach(inject(function ($injector) {
-            n4AuthenticationInterceptor = $injector.get('n4AuthenticationInterceptor');
             _http = $injector.get('$http');
             _httpBackend = $injector.get('$httpBackend');
             _windowMock = $injector.get('$window');
 
             spyOn(_windowMock.location, 'replace').and.callFake(angular.noop);
+            spyOn(provider, 'cb').and.callThrough();
         }));
 
         describe('responseError', function () {
@@ -46,10 +62,12 @@ describe('n4AuthenticationInterceptor', function() {
             it('should not redirect when HTTP status is not 401', function () {
                 _httpBackend.expectGET(URL).respond(400);
 
-                _http.get(URL)
+                _http.get(URL);
 
                 _httpBackend.flush();
 
+                expect(provider.cb).not.toHaveBeenCalled();
+                expect(provider.called).toBe(false);
                 expect(_windowMock.location.replace).not.toHaveBeenCalled();
             });
 
@@ -60,6 +78,8 @@ describe('n4AuthenticationInterceptor', function() {
 
                 _httpBackend.flush();
 
+                expect(provider.cb).toHaveBeenCalled();
+                expect(provider.called).toBe(true);
                 expect(_windowMock.location.replace).toHaveBeenCalled();
             });
         });

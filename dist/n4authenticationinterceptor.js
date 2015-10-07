@@ -11,6 +11,7 @@
       function() {
         var self = this;
 
+        self.cb = angular.noop; //callback to be executed before the redirect
         self.redirectURL = undefined;
         self.notAuthenticatedMessage = 'Usuário não autenticado.';
         self.statusHttp = 401;
@@ -19,6 +20,7 @@
           return {
             responseError: function(rejection) {
               if (rejection.status === self.statusHttp) {
+                self.cb();
                 $log.error(self.notAuthenticatedMessage);
                 $window.location.replace(self.redirectURL);
               }
