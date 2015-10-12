@@ -1,6 +1,6 @@
 {
   "name": "n4authenticationinterceptor",
-  "main": "n4authenticationinterceptor.js",
+  "main": "dist/n4authenticationinterceptor.js",
   "version": "0.0.1",
   "homepage": "https://github.com//n4authenticationinterceptor",
   "authors": ["N4Works <contato@n4works.com>"],
