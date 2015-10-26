@@ -72,6 +72,8 @@ describe('n4AuthenticationInterceptor', function() {
             });
 
             it('should redirect when HTTP status is 401', function () {
+                provider.redirectURL = 'test';
+
                 _httpBackend.expectGET(URL).respond(401);
 
                 _http.get(URL);
@@ -80,7 +82,21 @@ describe('n4AuthenticationInterceptor', function() {
 
                 expect(provider.cb).toHaveBeenCalled();
                 expect(provider.called).toBe(true);
-                expect(_windowMock.location.replace).toHaveBeenCalled();
+                expect(_windowMock.location.replace).toHaveBeenCalledWith('test');
+            });
+
+            it('should not redirect when HTTP status is 401 but redirectURL is empty', function () {
+                provider.redirectURL = null;
+
+                _httpBackend.expectGET(URL).respond(401);
+
+                _http.get(URL);
+
+                _httpBackend.flush();
+
+                expect(provider.cb).toHaveBeenCalled();
+                expect(provider.called).toBe(true);
+                expect(_windowMock.location.replace).not.toHaveBeenCalled();
             });
         });
     });

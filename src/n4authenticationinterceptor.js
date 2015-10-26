@@ -22,7 +22,9 @@
               if (rejection.status === self.statusHttp) {
                 self.cb();
                 $log.error(self.notAuthenticatedMessage);
-                $window.location.replace(self.redirectURL);
+                if (!!self.redirectURL) {
+                    $window.location.replace(self.redirectURL);
+                }
               }
 
               return $q.reject(rejection);
